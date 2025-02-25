@@ -1,36 +1,33 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import LoginPage from '../views/login.vue';
-import RegisterPage from '../views/RegisterPage.vue';
-import HomePage from '../views/HomePage.vue'; // Ajoute l'import
-import FeaturesPage from '../views/FeaturesPage.vue';
-import CategoriePage from '../views/CategoriePage.vue';
+import HomeLayout from '../components/HomeLayout.vue'; // Layout principal
+import HomePage from '../views/HomePage.vue'; // Page d'accueil
+import CategoriePage from '../views/CategoriePage.vue'; // Page des catégories
+import DepensePage from '../views/Depense.vue'; // Page des dépenses
+import Budget from '../views/Budget.vue';
+import Rapports from '../views/Rapports.vue';
+import Parametre from '../views/Parametre.vue';
 
 const routes = [
-  { path: '/', redirect: '/login' }, // Redirection vers login
-  { path: '/login', component: LoginPage },
-  { path: '/register', component: RegisterPage },
-  { path: '/home', component: HomePage }, // ✅ Vérifie que cette ligne est bien là
-  { path: '/features',component: FeaturesPage },
-  { path:'/category', component: CategoriePage},
+  {
+    path: '/home',
+    component: HomeLayout, // Utilisez HomeLayout comme layout
+    children: [
+      { path: '', component: HomePage }, // Page d'accueil
+      { path: 'category', component: CategoriePage }, // Catégories
+      { path: 'expenses', component: DepensePage }, // Dépenses
+      { path: 'budget', component: Budget }, // Budget
+      { path: 'reports', component: Rapports }, // Rapports
+      { path: 'settings', component: Parametre }, // Paramètres
+
+      // Ajoutez d'autres routes imbriquées ici
+    ],
+  },
+  { path: '/', redirect: '/home' }, // Redirection vers /home
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-});
-
-// 🚀 Protection des routes : redirection si pas connecté
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!localStorage.getItem('token'); // Vérifie le token
-
-  console.log(`🔍 Navigation vers ${to.path}, Authentifié: ${isAuthenticated}`);
-
-  if (to.path === '/home' && !isAuthenticated) {
-    console.warn("⛔ Accès refusé : Redirection vers /login !");
-    return next('/login');
-  }
-
-  next();
+  routes,
 });
 
 export default router;

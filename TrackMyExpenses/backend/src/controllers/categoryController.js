@@ -2,13 +2,16 @@ import Category from '../models/Category.js';
 
 // Créer une catégorie
 export const createCategory = async (req, res) => {
-  const { name } = req.body;
+  const { name, icon, description } = req.body;
 
   try {
-    const category = await Category.create({ name });
-    res.status(201).json({ message: 'Categorie crerr', category });
+    const category = await Category.create({ name, icon, description });
+    res.status(201).json({ message: 'Catégorie créée avec succès', category });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur lors de la creation', error: err.message });
+    if (err.name === 'SequelizeValidationError') {
+      return res.status(400).json({ message: 'Validation error', errors: err.errors });
+    }
+    res.status(500).json({ message: 'Erreur lors de la création', error: err.message });
   }
 };
 
@@ -18,27 +21,28 @@ export const getCategories = async (req, res) => {
     const categories = await Category.findAll();
     res.json({ categories });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur de recuperation', error: err.message });
+    res.status(500).json({ message: 'Erreur lors de la récupération', error: err.message });
   }
 };
 
 // Mettre à jour une catégorie
 export const updateCategory = async (req, res) => {
   const { id } = req.params;
-  const { name } = req.body;
+  const { name, icon, description } = req.body;
 
   try {
     const category = await Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({ message: 'Categorie introuvable' });
+      return res.status(404).json({ message: 'Catégorie introuvable' });
     }
 
-    category.name = name;
-    await category.save();
-
-    res.json({ message: 'Categorie modifier', category });
+    await category.update({ name, icon, description });
+    res.json({ message: 'Catégorie mise à jour avec succès', category });
   } catch (err) {
-    res.status(500).json({ message: 'erreur lors de la modification', error: err.message });
+    if (err.name === 'SequelizeValidationError') {
+      return res.status(400).json({ message: 'Validation error', errors: err.errors });
+    }
+    res.status(500).json({ message: 'Erreur lors de la mise à jour', error: err.message });
   }
 };
 
@@ -49,12 +53,12 @@ export const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({ message: 'Categorie introuvable' });
+      return res.status(404).json({ message: 'Catégorie introuvable' });
     }
 
     await category.destroy();
-    res.json({ message: 'Categorie supprimer' });
+    res.json({ message: 'Catégorie supprimée avec succès' });
   } catch (err) {
-    res.status(500).json({ message: 'Ereur lors de la suppression', error: err.message });
+    res.status(500).json({ message: 'Erreur lors de la suppression', error: err.message });
   }
 };
